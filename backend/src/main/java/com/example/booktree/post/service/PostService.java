@@ -399,7 +399,7 @@ public class PostService {
         //postRepository.save(post);
     }
 
-
+//깃 이메일 설정 잘못되어있던거 바로잡고 다시
     // 게시글 아이디로 해당 게시글 조회 (조회수 증가)
     @Transactional
     public Post findPostById(Long postId) {
