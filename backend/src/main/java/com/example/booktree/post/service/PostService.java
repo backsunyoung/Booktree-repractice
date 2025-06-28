@@ -15,7 +15,7 @@ import com.example.booktree.likepost.repository.LikePostRepository;
 import com.example.booktree.maincategory.entity.MainCategory;
 import com.example.booktree.maincategory.repository.MainCategoryRepository;
 import com.example.booktree.maincategory.service.MainCategortService;
-import com.example.booktree.popularpost.service.PopularPostService;
+//import com.example.booktree.popularpost.service.PopularPostService;
 import com.example.booktree.post.dto.request.PostRequestDto;
 import com.example.booktree.post.dto.response.PostResponseDto;
 import com.example.booktree.post.dto.response.PostTop3ResponseDto;
@@ -41,7 +41,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-//import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -63,7 +63,7 @@ import static com.example.booktree.utils.ImageUtil.DEFAULT_POST_IMAGE;
 @RequiredArgsConstructor
 public class PostService {
 
-    private final S3Uploader s3Uploader;
+    //private final S3Uploader s3Uploader;
 
     private final PostRepository postRepository;
     private final MainCategortService mainCategortService;
@@ -80,7 +80,7 @@ public class PostService {
 
 
 
-    private final PopularPostService popularPostService;
+    //private final PopularPostService popularPostService;
 
     private final String defaultImageUrl = DEFAULT_POST_IMAGE;
 
@@ -136,37 +136,38 @@ public class PostService {
         }
 
         // 이미지 업로드
-        List<String> uploadedImageUrls = new ArrayList<>();
-        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-            uploadedImageUrls = s3Uploader.autoImagesUploadAndDelete(new ArrayList<>(), dto.getImages());
-        }
+//        List<String> uploadedImageUrls = new ArrayList<>();
+//        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+//            uploadedImageUrls = s3Uploader.autoImagesUploadAndDelete(new ArrayList<>(), dto.getImages());
+//        }
 
         // content 조립
-        StringBuilder contentBuilder = new StringBuilder();
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            List<PostRequestDto.ContentPart> contentParts = objectMapper.readValue(
-                    dto.getContentParts(), new TypeReference<List<PostRequestDto.ContentPart>>() {}
-            );
-
-            for (PostRequestDto.ContentPart part : contentParts) {
-                if ("text".equals(part.getType())) {
-                    contentBuilder.append("<p>").append(part.getData()).append("</p>");
-                } else if ("image".equals(part.getType()) && part.getIndex() != null) {
-                    String imageUrl = uploadedImageUrls.get(part.getIndex());
-                    contentBuilder.append("<img src=\"").append(imageUrl).append("\" />");
-                }
-            }
-        } catch (Exception e) {
-            throw new BusinessLogicException(ExceptionCode.INVALID_CONTENT_PARTS); // 직접 예외 만들거나 수정
-        }
-        String finalContent = contentBuilder.toString();
+//        StringBuilder contentBuilder = new StringBuilder();
+//        try {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            List<PostRequestDto.ContentPart> contentParts = objectMapper.readValue(
+//                    dto.getContentParts(), new TypeReference<List<PostRequestDto.ContentPart>>() {}
+//            );
+//
+//            for (PostRequestDto.ContentPart part : contentParts) {
+//                if ("text".equals(part.getType())) {
+//                    contentBuilder.append("<p>").append(part.getData()).append("</p>");
+//                } else if ("image".equals(part.getType()) && part.getIndex() != null) {
+//                    String imageUrl = uploadedImageUrls.get(part.getIndex());
+//                    contentBuilder.append("<img src=\"").append(imageUrl).append("\" />");
+//                }
+//            }
+//        } catch (Exception e) {
+//            throw new BusinessLogicException(ExceptionCode.INVALID_CONTENT_PARTS); // 직접 예외 만들거나 수정
+//        }
+//        String finalContent = contentBuilder.toString();
 
 
 
         Post post = Post.builder()
                 .title(dto.getTitle())
-                .content(finalContent)
+                //.content(finalContent)
+                .content(dto.getContent())
                 .author(dto.getAuthor())
                 .book(dto.getBook())
                 .user(user)
@@ -182,14 +183,14 @@ public class PostService {
 
 
         // 이미지 저장 (imageList도 따로 저장하는거면 여기서 추가)
-        if (!uploadedImageUrls.isEmpty()) {
-            for (String imageUrl : uploadedImageUrls) {
-                Image image = new Image();
-                image.setPost(post);
-                image.setImageUrl(imageUrl);
-                imageRepository.save(image);
-            }
-        }
+//        if (!uploadedImageUrls.isEmpty()) {
+//            for (String imageUrl : uploadedImageUrls) {
+//                Image image = new Image();
+//                image.setPost(post);
+//                image.setImageUrl(imageUrl);
+//                imageRepository.save(image);
+//            }
+//        }
 
 
         // 이미지 업로드
@@ -243,52 +244,52 @@ public class PostService {
             post.setCategory(category);
         }
 
-        List<String> uploadedImageUrls = new ArrayList<>();
-        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-            List<String> currentImageUrls = new ArrayList<>();
-            for (Image image : post.getImageList()) {
-                currentImageUrls.add(image.getImageUrl());
-            }
-
-            uploadedImageUrls = s3Uploader.autoImagesUploadAndDelete(currentImageUrls, dto.getImages());
-
-            imageRepository.deleteAll(post.getImageList());
-            post.getImageList().clear();
-
-            for (String imageUrl : uploadedImageUrls) {
-                Image newImage = new Image();
-                newImage.setPost(post);
-                newImage.setImageUrl(imageUrl);
-                imageRepository.save(newImage); // 새 이미지 저장
-            }
-        }
+//        List<String> uploadedImageUrls = new ArrayList<>();
+//        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+//            List<String> currentImageUrls = new ArrayList<>();
+//            for (Image image : post.getImageList()) {
+//                currentImageUrls.add(image.getImageUrl());
+//            }
+//
+//            uploadedImageUrls = s3Uploader.autoImagesUploadAndDelete(currentImageUrls, dto.getImages());
+//
+//            imageRepository.deleteAll(post.getImageList());
+//            post.getImageList().clear();
+//
+//            for (String imageUrl : uploadedImageUrls) {
+//                Image newImage = new Image();
+//                newImage.setPost(post);
+//                newImage.setImageUrl(imageUrl);
+//                imageRepository.save(newImage); // 새 이미지 저장
+//            }
+//        }
 
         // 💡 contentParts 기반으로 글/이미지 content 조립
-        if (dto.getContentParts() != null) {
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                List<PostRequestDto.ContentPart> contentParts = objectMapper.readValue(
-                        dto.getContentParts(),
-                        new TypeReference<List<PostRequestDto.ContentPart>>() {}
-                );
-
-                StringBuilder builder = new StringBuilder();
-                for (PostRequestDto.ContentPart part : contentParts) {
-                    if ("text".equals(part.getType())) {
-                        builder.append("<p>").append(part.getData()).append("</p>");
-                    } else if ("image".equals(part.getType()) && part.getIndex() != null) {
-                        // 이미지가 존재할 경우에만
-                        if (part.getIndex() < uploadedImageUrls.size()) {
-                            builder.append("<img src=\"").append(uploadedImageUrls.get(part.getIndex())).append("\" />");
-                        }
-                    }
-                }
-
-                post.setContent(builder.toString()); // 최종 content 반영
-            } catch (Exception e) {
-                throw new BusinessLogicException(ExceptionCode.INVALID_CONTENT_PARTS);
-            }
-        }
+//        if (dto.getContentParts() != null) {
+//            try {
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                List<PostRequestDto.ContentPart> contentParts = objectMapper.readValue(
+//                        dto.getContentParts(),
+//                        new TypeReference<List<PostRequestDto.ContentPart>>() {}
+//                );
+//
+//                StringBuilder builder = new StringBuilder();
+//                for (PostRequestDto.ContentPart part : contentParts) {
+//                    if ("text".equals(part.getType())) {
+//                        builder.append("<p>").append(part.getData()).append("</p>");
+//                    } else if ("image".equals(part.getType()) && part.getIndex() != null) {
+//                        // 이미지가 존재할 경우에만
+//                        if (part.getIndex() < uploadedImageUrls.size()) {
+//                            builder.append("<img src=\"").append(uploadedImageUrls.get(part.getIndex())).append("\" />");
+//                        }
+//                    }
+//                }
+//
+//                post.setContent(builder.toString()); // 최종 content 반영
+//            } catch (Exception e) {
+//                throw new BusinessLogicException(ExceptionCode.INVALID_CONTENT_PARTS);
+//            }
+//        }
     }
 
 
@@ -314,9 +315,9 @@ public class PostService {
             throw new BusinessLogicException(ExceptionCode.BLOG_NOT_OWNER);
         }
 
-        for (Image image : post.getImageList()) {
-            s3Uploader.deleteFile(image.getImageUrl());
-        }
+//        for (Image image : post.getImageList()) {
+//            s3Uploader.deleteFile(image.getImageUrl());
+//        }
 
         // 댓글 삭제 (댓글이 Post를 참조하므로 댓글을 먼저 삭제)
         commentRepository.deleteByPostId(postId);  // 댓글 테이블에서 해당 게시글 ID를 참조하는 댓글들 삭제
@@ -327,7 +328,7 @@ public class PostService {
         imageRepository.deleteAll(post.getImageList());
 
         Long mainCategoryId = post.getMainCategory().getId();
-        popularPostService.removePostFromPopularity(postId, mainCategoryId);
+        //popularPostService.removePostFromPopularity(postId, mainCategoryId);
         postRepository.delete(post);
     }
 

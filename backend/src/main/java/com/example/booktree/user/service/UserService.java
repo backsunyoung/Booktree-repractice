@@ -16,7 +16,7 @@ import com.example.booktree.jwt.service.TokenService;
 import com.example.booktree.likecomment.repository.LikeCommentRepository;
 import com.example.booktree.likepost.repository.LikePostRepository;
 import com.example.booktree.likereply.repository.LikeReplyRepository;
-import com.example.booktree.popularpost.service.PopularPostService;
+//import com.example.booktree.popularpost.service.PopularPostService;
 import com.example.booktree.post.entity.Post;
 import com.example.booktree.post.repository.PostRepository;
 import com.example.booktree.reply.repository.ReplyRepository;
@@ -66,7 +66,7 @@ public class UserService {
     private final TokenService tokenService;
     private final ImageService imageService;
     private static final String USER_IMAGE= DEFAULT_USER_IMAGE;
-    private final PopularPostService popularPostService;
+    //private final PopularPostService popularPostService;
 
 
     public User findById(Long userId) {
@@ -294,7 +294,7 @@ public class UserService {
             // 해당 게시글에 연결된 이미지들 목록을 가져옴
             List<Image> imageList = post.getImageList();
             Long categoryId = post.getMainCategory().getId(); // 게시글의 메인 카테고리
-            popularPostService.removePostFromPopularity(post.getId(), categoryId); // Redis 정
+            //popularPostService.removePostFromPopularity(post.getId(), categoryId); // Redis 정
 
             for (Image image : imageList) {
                 imageService.deleteFile(image.getImageUrl());
